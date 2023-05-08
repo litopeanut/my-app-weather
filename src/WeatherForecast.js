@@ -1,23 +1,41 @@
 import React, { useState, useEffect } from "react";
-import WeatherForecastDay from "./WeatherForecastDay";
 import "./WeatherForecast.css";
 import axios from "axios";
+import WeatherForecastDay from "./WeatherForecastDay";
 
 export default function WeatherForecast(props) {
-  const [loaded, setLoaded] = useState(false);
-  const [forecast, setForecast] = useState(null);
+  let [loaded, setLoaded] = useState(false);
+  let [forecast, setForecast] = useState(null);
 
   useEffect(() => {
     setLoaded(false);
-  }, [props.coord]);
+  }, [props.coordinates]);
 
   function handleResponse(response) {
     setForecast(response.data.daily);
     setLoaded(true);
   }
 
-  function load() {
-    let apiKey = "d5c7423826b5765e4dd4d5b5fe0dca49";
+  if (loaded) {
+    return (
+      <div className="WeatherForecast">
+        <div className="row">
+          {forecast.map(function (dailyForecast, index) {
+            if (index < 5) {
+              return (
+                <div className="col" key={index}>
+                  <WeatherForecastDay data={dailyForecast} />
+                </div>
+              );
+            } else {
+              return null;
+            }
+          })}
+        </div>
+      </div>
+    );
+  } else {
+    let apiKey = "dff5c692192605ee5ed7f95b423ae857";
     let longitude = props.coordinates.longitude;
     let latitude = props.coordinates.latitude;
     let apiUrl = `https://api.openweathermap.org/data/2.5/onecall?lat=${latitude}&lon=${longitude}&appid=${apiKey}&units=metric`;
@@ -25,31 +43,5 @@ export default function WeatherForecast(props) {
     axios.get(apiUrl).then(handleResponse);
 
     return null;
-  }
-
-  if (loaded) {
-    return (
-      <div className="WeatherForecast">
-        <div className="row">
-          <div className="col">
-            <WeatherForecastDay data={forecast[0]} />
-          </div>
-          <div className="col">
-            <WeatherForecastDay data={forecast[1]} />
-          </div>
-          <div className="col">
-            <WeatherForecastDay data={forecast[2]} />
-          </div>
-          <div className="col">
-            <WeatherForecastDay data={forecast[3]} />
-          </div>
-          <div className="col">
-            <WeatherForecastDay data={forecast[4]} />
-          </div>
-        </div>
-      </div>
-    );
-  } else {
-    load();
   }
 }
